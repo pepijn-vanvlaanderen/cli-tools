@@ -406,8 +406,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         if export_options.is_app_store_export() or export_options.iCloudContainerEnvironment:
             return
-
-        archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive, cli_app=self)
+        try:
+            archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive, cli_app=self)
+        except IOError as ioe:
+            self.logger.debug('Loading entitlements failed: %s', ioe)
+            return
         icloud_services = archive_entitlements.get_icloud_services()
         if not {'CloudKit', 'CloudDocuments'}.intersection(icloud_services):
             return
